@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prod Gmn | Beat Store</title>
+<meta name="description" content="Prods by Prod Gmn: listen to previews, choose MP3 or WAV, checkout and download instantly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nuit:#09090b;
+  --panneau:#16161a;
+  --panneau-2:#22222b;
+  --texte:#f3f4f6;
+  --texte-doux:#9ca3af;
+  --mangue:#f59e0b;
+  --menthe:#10b981;
+  --erreur:#ef4444;
+  --rayon:16px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--nuit);color:var(--texte);font-family:"Instrument Sans",system-ui,sans-serif;line-height:1.55;min-height:100vh}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.05;letter-spacing:-.02em}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid var(--mangue);outline-offset:2px}
+
+header.top{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;background:rgba(9,9,11,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--panneau-2)}
+.logo{font-family:"Bricolage Grotesque";font-weight:800;font-size:1.4rem;letter-spacing:-0.03em}
+.logo span{color:var(--mangue);text-shadow:0 0 15px rgba(245,158,11,0.4)}
+nav.top-nav{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-weight:600;background:var(--mangue);color:#09090b;transition:transform .2s cubic-bezier(0.16,1,0.3,1), box-shadow .2s ease;text-decoration:none;box-shadow:0 4px 12px rgba(245,158,11,0.25)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,158,11,0.4)}
+.btn.sec{background:var(--panneau-2);color:var(--texte);box-shadow:none}
+.btn.sec:hover{background:#2a2a35;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.btn.danger{background:var(--erreur);color:#fff;box-shadow:0 4px 12px rgba(239,68,68,0.3)}
+.btn[disabled]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.petit{padding:8px 14px;font-size:.92rem}
+.badge{background:var(--nuit);color:var(--mangue);border-radius:999px;min-width:22px;height:22px;display:inline-grid;place-items:center;font-size:.8rem;padding:0 6px;border:1px solid var(--panneau-2)}
+
+.hero{padding:8vh 5vw 5vh;max-width:1400px;margin:0 auto}
+.hero h1{font-size:clamp(2.5rem,7vw,5.5rem);font-weight:800;max-width:14ch;background:linear-gradient(135deg, #fff 30%, var(--texte-doux) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin-top:18px;color:var(--texte-doux);max-width:48ch;font-size:1.15rem}
+.hero .btn{margin-top:28px}
+
+section.bloc{max-width:1400px;margin:0 auto;padding:4vh 5vw}
+.bloc-tete{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:end;margin-bottom:24px}
+.bloc h2{font-size:clamp(1.6rem,3.5vw,2.4rem)}
+.filtres{display:flex;gap:8px;flex-wrap:wrap}
+.filtre{padding:8px 16px;border-radius:999px;background:var(--panneau);color:var(--texte-doux);font-weight:500;border:1px solid var(--panneau-2);transition:all .2s ease}
+.filtre:hover{color:var(--texte);border-color:var(--mangue)}
+.filtre[aria-pressed="true"]{background:var(--mangue);color:#09090b;border-color:var(--mangue);font-weight:600}
+
+/* CAROUSEL HORIZONTAL POUR LES POCHETTES */
+.grille {
+  display: flex;
+  overflow-x: auto;
+  gap: 24px;
+  padding: 10px 4px 24px 4px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mangue) var(--panneau);
+}
+.grille::-webkit-scrollbar {
+  height: 8px;
+}
+.grille::-webkit-scrollbar-track {
+  background: var(--panneau);
+  border-radius: 4px;
+}
+.grille::-webkit-scrollbar-thumb {
+  background: var(--mangue);
+  border-radius: 4px;
+}
+
+.carte {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  background: var(--panneau);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--panneau-2);
+  transition: transform .3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .3s ease, border-color .3s ease;
+}
+.carte:hover {
+  transform: translateY(-6px);
+  border-color: rgba(245,158,11,0.4);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.5), 0 0 20px rgba(245,158,11,0.15);
+}
+
+.pochette{position:relative;aspect-ratio:1;display:block;width:100%;overflow:hidden}
+.pochette svg,.pochette img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .5s ease}
+.carte:hover .pochette img, .carte:hover .pochette svg{transform:scale(1.03)}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.play{position:absolute;right:14px;bottom:14px;width:52px;height:52px;border-radius:50%;background:var(--mangue);color:#09090b;display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.4);transition:transform .2s ease;animation: pulseGlow 2.5s infinite;}
+.play:hover{transform:scale(1.1)}
+.play svg{width:22px;height:22px}
+
+.carte .corps{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.carte h3{font-size:1.25rem}
+.meta{color:var(--texte-doux);font-size:.9rem}
+.barre{height:4px;border-radius:4px;background:var(--panneau-2);overflow:hidden}
+.barre i{display:block;height:100%;width:0;background:var(--menthe);transition:width .1s linear}
+.carte .bas{margin-top:auto;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.prix{font-weight:600;color:var(--mangue)}
+.vide{color:var(--texte-doux);padding:20px 0}
+
+dialog{border:0;border-radius:20px;background:var(--panneau);color:var(--texte);width:min(860px,94vw);padding:0;max-height:92vh;border:1px solid var(--panneau-2);box-shadow:0 25px 50px rgba(0,0,0,0.7)}
+dialog::backdrop{background:rgba(5,5,7,.8);backdrop-filter:blur(5px)}
+.fiche{display:grid;grid-template-columns:minmax(0,340px) 1fr}
+.fiche .pochette{height:100%}
+.fiche .info{padding:30px;display:flex;flex-direction:column;gap:16px}
+.fiche h2{font-size:2rem}
+.specs{display:flex;gap:10px;flex-wrap:wrap}
+.spec{background:var(--panneau-2);border-radius:12px;padding:10px 14px;font-size:.9rem;border:1px solid rgba(255,255,255,0.03)}
+.spec b{display:block;font-size:1.05rem;color:var(--mangue)}
+.formats{display:grid;gap:10px;border:0;padding:0}
+.formats legend{font-weight:600;margin-bottom:8px}
+.format{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 16px;border-radius:14px;background:var(--panneau-2);cursor:pointer;border:2px solid transparent;transition:border-color .2s ease}
+.format:hover{border-color:rgba(245,158,11,0.4)}
+.format:has(input:checked){border-color:var(--mangue);background:rgba(245,158,11,0.05)}
+.format small{color:var(--texte-doux);display:block}
+.format input{accent-color:var(--mangue)}
+.fermer{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:rgba(22,22,26,.9);font-size:1.2rem;z-index:2;display:grid;place-items:center;border:1px solid var(--panneau-2);transition:background .2s}
+.fermer:hover{background:var(--panneau-2)}
+@media (max-width:680px){.fiche{grid-template-columns:1fr}.fiche .pochette{aspect-ratio:16/10;height:auto}}
+
+.voile{position:fixed;inset:0;background:rgba(5,5,7,.7);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:30}
+.voile.ouvert{opacity:1;pointer-events:auto}
+aside.panier{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--panneau);z-index:31;transform:translateX(100%);transition:transform .3s cubic-bezier(0.16,1,0.3,1);display:flex;flex-direction:column;border-left:1px solid var(--panneau-2);box-shadow:-10px 0 30px rgba(0,0,0,0.5)}
+aside.panier.ouvert{transform:none}
+.panier header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--panneau-2)}
+.panier h2{font-size:1.4rem}
+.lignes{flex:1;overflow:auto;padding:16px 24px;display:grid;gap:14px;align-content:start}
+.ligne{display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:center;background:var(--panneau-2);padding:10px;border-radius:12px}
+.ligne .pochette{width:60px;border-radius:8px}
+.ligne small{color:var(--texte-doux)}
+.retirer{color:var(--texte-doux);text-decoration:underline;font-size:.85rem;transition:color .2s}
+.retirer:hover{color:var(--erreur)}
+.pied{padding:20px 24px;border-top:1px solid var(--panneau-2);display:grid;gap:14px;background:rgba(9,9,11,0.5)}
+.total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700}
+.total span:last-child{color:var(--mangue)}
+.champ label{display:block;font-size:.9rem;color:var(--texte-doux);margin-bottom:6px}
+.champ input,.champ textarea,.champ select{width:100%;padding:12px 16px;border-radius:12px;border:2px solid var(--panneau-2);background:var(--nuit);color:var(--texte);font:inherit;transition:border-color .2s}
+.champ input:focus,.champ textarea:focus{border-color:var(--mangue);outline:0}
+.champ textarea{min-height:90px;resize:vertical}
+.champ small{display:block;color:var(--texte-doux);margin-top:6px;font-size:.82rem}
+.msg{font-size:.9rem;min-height:1.2em}
+.msg.err{color:var(--erreur)}
+.msg.ok{color:var(--menthe)}
+
+#achats[hidden]{display:none}
+.achat{background:var(--panneau);border:1px solid var(--panneau-2);border-radius:var(--rayon);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.achat .liens{display:flex;gap:10px;flex-wrap:wrap}
+.banniere{background:var(--menthe);color:#062319;border-radius:var(--rayon);padding:16px 20px;margin:20px auto 0;font-weight:600;max-width:1400px;width:calc(100% - 10vw);box-shadow:0 10px 25px rgba(16,185,129,0.2)}
+.banniere.err{background:var(--erreur);color:#fff;box-shadow:0 10px 25px rgba(239,68,68,0.2)}
+
+.adm{padding:30px}
+.adm h2{font-size:1.8rem;margin-bottom:8px}
+.adm-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.adm-prod{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;background:var(--panneau-2);border-radius:14px;padding:12px 16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
+.adm-prod .pochette{width:64px;border-radius:8px}
+.adm-prod .btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.grille-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grille-form .large{grid-column:1/-1}
+.apercu-pochette{width:120px;margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid var(--panneau-2)}
+@media (max-width:640px){.grille-form{grid-template-columns:1fr}.adm-prod{grid-template-columns:56px 1fr}.adm-prod .btns{grid-column:1/-1;justify-content:flex-start}}
+
+footer{padding:50px 5vw;text-align:center;color:var(--texte-doux);font-size:.9rem;border-top:1px solid var(--panneau-2);margin-top:60px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo">Prod <span>Gmn</span></div>
+  <nav class="top-nav" aria-label="Navigation">
+    <button class="btn sec" id="btnAchats" hidden>Mes achats</button>
+    <button class="btn" id="btnPanier" aria-controls="panier">Panier <span class="badge" id="nbPanier">0</span></button>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>High-end beats ready for your vocals.</h1>
+    <p>Listen to previews, pick your format (MP3 or WAV), checkout securely and download instantly.</p>
+    <a class="btn" href="#catalogue">Explorer le catalogue</a>
+  </div>
+
+  <section class="bloc" id="achats" hidden aria-labelledby="titreAchats">
+    <div class="bloc-tete"><h2 id="titreAchats">Mes achats</h2></div>
+    <div id="listeAchats"></div>
+  </section>
+
+  <section class="bloc" id="catalogue" aria-labelledby="titreCat">
+    <div class="bloc-tete">
+      <h2 id="titreCat">Catalogue</h2>
+      <div class="filtres" id="filtres" role="group" aria-label="Filtrer par style"></div>
+    </div>
+    <div class="grille" id="grille"></div>
+  </section>
+</main>
+
+<footer>© <span id="annee"></span> Prod Gmn. Tous droits réservés.</footer>
+
+<dialog id="fiche" aria-labelledby="ficheTitre">
+  <button class="fermer" id="fermerFiche" aria-label="Fermer la fiche">✕</button>
+  <div class="fiche">
+    <div class="pochette" id="fichePochette"></div>
+    <div class="info">
+      <h2 id="ficheTitre"></h2>
+      <p id="ficheDesc" class="meta"></p>
+      <div class="specs" id="ficheSpecs"></div>
+      <div>
+        <button class="btn sec petit" id="ficheEcoute">Écouter l'extrait</button>
+        <div class="barre" style="margin-top:12px"><i id="ficheBarre"></i></div>
+      </div>
+      <fieldset class="formats" id="formats"><legend>Choisis ton format</legend></fieldset>
+      <button class="btn" id="ajouter">Ajouter au panier</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="voile" id="voile"></div>
+<aside class="panier" id="panier" aria-label="Panier" aria-hidden="true">
+  <header>
+    <h2>Ton panier</h2>
+    <button class="fermer" style="position:static" id="fermerPanier" aria-label="Fermer le panier">✕</button>
+  </header>
+  <div class="lignes" id="lignes"></div>
+  <div class="pied">
+    <div class="total"><span>Total</span><span id="total">$0</span></div>
+    <div class="champ">
+      <label for="email">Ton email (pour recevoir tes fichiers)</label>
+      <input id="email" type="email" autocomplete="email" placeholder="exemple@mail.com">
+    </div>
+    <button class="btn" id="payer" disabled>Payer avec Notch Pay</button>
+    <p class="msg" id="msgPaiement" role="status"></p>
+  </div>
+</aside>
+
+<dialog id="admin" aria-label="Gérer mes prods">
+  <button class="fermer" id="fermerAdmin" aria-label="Fermer">✕</button>
+  <div class="adm" id="adminCorps"></div>
+</dialog>
+
+<script type="application/json" id="catalogue-data">
+[
+  {"id":"p1","titre":"Midnight Code","genre":"Trap","bpm":140,"tonalite":"F# mineur","teinte":340,"description":"Dark trap beat, heavy 808s and atmospheric pads. Built for melodic and aggressive flows.","prix":{"mp3":25,"wav":50},"preview":"","fichiers":{"mp3":"fichiers/midnight-code.mp3","wav":"fichiers/midnight-code.wav"},"image":""},
+  {"id":"p2","titre":"Golden Era","genre":"Boom Bap","bpm":92,"tonalite":"A mineur","teinte":40,"description":"Authentic boom bap rhythm with dusty vinyl samples and hard-hitting acoustic drums.","prix":{"mp3":25,"wav":45},"preview":"","fichiers":{"mp3":"fichiers/golden-era.mp3","wav":"fichiers/golden-era.wav"},"image":""},
+  {"id":"p3","titre":"Neon Alley","genre":"Drill","bpm":142,"tonalite":"C mineur","teinte":220,"description":"Dark UK/Chicago drill sliding basslines, crisp hi-hats and cinematic orchestral stabs.","prix":{"mp3":30,"wav":60},"preview":"","fichiers":{"mp3":"fichiers/neon-alley.mp3","wav":"fichiers/neon-alley.wav"},"image":""},
+  {"id":"p4","titre":"Horizon","genre":"Afro Trap","bpm":115,"tonalite":"G mineur","teinte":160,"description":"Energetic Afro trap fusion featuring rhythmic percussion, warm synths and catchy bounce.","prix":{"mp3":25,"wav":50},"preview":"","fichiers":{"mp3":"fichiers/horizon.mp3","wav":"fichiers/horizon.wav"},"image":""}
+]
+</script>
+
+<script>
+const SOURCE = `<!DOCTYPE html>\n` + document.documentElement.outerHTML;
+
+const CONFIG = {
+  nomBoutique: "Prod Gmn",
+  notchPublicKey: "",
+  devise: "USD",
+  urlRetour: location.origin + location.pathname,
+  dureeExtrait: 30
+};
+
+const $ = s => document.querySelector(s);
+const prixUSD = n => "$" + n;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+const ICONE_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const ICONE_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+
+const PUBLIE = JSON.parse($("#catalogue-data").textContent);
+let PRODS = store.get("brouillonCatalogue", null) || JSON.parse(JSON.stringify(PUBLIE));
+const prod = id => PRODS.find(p => p.id === id);
+const prixDispo = p => ["mp3","wav"].filter(k => p.prix && Number(p.prix[k]) > 0);
+
+function pochette(p){
+  if(p.image) return `<img src="${p.image}" alt="Pochette de ${esc(p.titre)}">`;
+  const h = p.teinte ?? 260, h2 = (h+60)%360;
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="Pochette de ${esc(p.titre)}" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="g${esc(p.id)}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(${h} 80% 35%)"/><stop offset="1" stop-color="hsl(${h2} 80% 12%)"/></linearGradient></defs>
+    <rect width="200" height="200" fill="url(#g${esc(p.id)})"/>
+    <circle cx="140" cy="60" r="${34 + ((p.bpm||0)%20)}" fill="hsl(${h2} 90% 60% / .25)"/>
+    <circle cx="70" cy="140" r="64" fill="none" stroke="hsl(${h} 90% 80% / .25)" stroke-width="2"/>
+    <circle cx="70" cy="140" r="44" fill="none" stroke="hsl(${h} 90% 80% / .25)" stroke-width="2"/>
+    <text x="16" y="36" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="18" fill="#fff">${esc(p.titre)}</text>
+    <text x="16" y="56" font-family="Instrument Sans, sans-serif" font-size="11" fill="#fff" fill-opacity=".7">${esc(p.bpm)} BPM</text>
+  </svg>`;
+}
+
+const lecteur = {
+  idEnCours:null, audio:null, ctx:null, minuteur:null, debut:0, pas:0, prochain:0,
+  basculer(id){
+    if(this.idEnCours === id){ this.stop(); return; }
+    this.stop();
+    const p = prod(id); if(!p) return;
+    this.idEnCours = id;
+    this.majBoutons();
+    if(p.preview){
+      this.audio = new Audio(p.preview);
+      this.audio.play().catch(() => this.stop());
+      this.audio.addEventListener("timeupdate", () => {
+        if(!this.audio) return;
+        const d = Math.min(this.audio.duration || CONFIG.dureeExtrait, CONFIG.dureeExtrait);
+        this.progres(this.audio.currentTime / d);
+        if(this.audio.currentTime >= CONFIG.dureeExtrait) this.stop();
+      });
+      this.audio.addEventListener("ended", () => this.stop());
+    } else {
+      this.synthe(p);
+    }
+  },
+  progres(r){ document.querySelectorAll(`[data-barre="${this.idEnCours}"]`).forEach(b => b.style.width = (r*100)+"%"); },
+  majBoutons(){
+    document.querySelectorAll("[data-play]").forEach(b => b.innerHTML = (b.dataset.play === this.idEnCours) ? ICONE_PAUSE : ICONE_PLAY);
+    const e = $("#ficheEcoute");
+    if(e && e.dataset.id) e.textContent = (e.dataset.id === this.idEnCours) ? "Pause" : "Écouter l'extrait";
+  },
+  stop(){
+    if(this.audio){ this.audio.pause(); this.audio = null; }
+    if(this.minuteur){ clearInterval(this.minuteur); this.minuteur = null; }
+    if(this.ctx){ this.ctx.close(); this.ctx = null; }
+    if(this.idEnCours) this.progres(0);
+    this.idEnCours = null;
+    this.majBoutons();
+  },
+  synthe(p){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC();
+    const c = this.ctx;
+    const racines = {"C":65.41,"C#":69.30,"D":73.42,"D#":77.78,"E":82.41,"F":87.31,"F#":92.50,"G":98.00,"G#":103.83,"A":110.00,"A#":116.54,"B":123.47};
+    const racine = racines[String(p.tonalite || "A").split(" ")[0]] || 110;
+    const bpm = Number(p.bpm) > 40 ? Number(p.bpm) : 100;
+    const pas = 60 / bpm / 4;
+    this.pas = 0; this.prochain = c.currentTime + .1; this.debut = c.currentTime;
+    const bruit = (t, dur, vol, freq) => {
+      const b = c.createBuffer(1, c.sampleRate * dur, c.sampleRate), d = b.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+      const s = c.createBufferSource(); s.buffer = b;
+      const f = c.createBiquadFilter(); f.type = "highpass"; f.frequency.value = freq;
+      const g = c.createGain(); g.gain.value = vol;
+      s.connect(f).connect(g).connect(c.destination); s.start(t);
+    };
+    const kick = t => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t+.18);
+      g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t+.25);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t+.3);
+    };
+    const basse = (t, f) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = "sawtooth"; o.frequency.value = f;
+      const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 400;
+      g.gain.setValueAtTime(.28, t); g.gain.exponentialRampToValueAtTime(.001, t + pas*3);
+      o.connect(lp).connect(g).connect(c.destination); o.start(t); o.stop(t + pas*3);
+    };
+    const motifBasse = {0:1, 6:1, 10:1.5, 14:1.125};
+    const planifier = () => {
+      while(this.prochain < c.currentTime + .2){
+        const s = this.pas % 16, t = this.prochain;
+        if([0,6,10].includes(s)) kick(t);
+        if([4,12].includes(s)) bruit(t, .15, .5, 1500);
+        if(s % 2 === 0) bruit(t, .04, .18, 7000);
+        if(motifBasse[s]) basse(t, racine * 2 * motifBasse[s]);
+        this.prochain += pas; this.pas++;
+      }
+    };
+    planifier();
+    this.minuteur = setInterval(() => {
+      planifier();
+      const ecoule = c.currentTime - this.debut;
+      this.progres(ecoule / CONFIG.dureeExtrait);
+      if(ecoule >= CONFIG.dureeExtrait) this.stop();
+    }, 50);
+  }
+};
+
+let filtreActif = "Tous";
+
+function rendreFiltres(){
+  const genres = ["Tous", ...new Set(PRODS.map(p => p.genre).filter(Boolean))];
+  if(!genres.includes(filtreActif)) filtreActif = "Tous";
+  $("#filtres").innerHTML = genres.length > 2 ? genres.map(g => `<button class="filtre" aria-pressed="${g===filtreActif}" data-g="${esc(g)}">${esc(g)}</button>`).join("") : "";
+  $("#filtres").querySelectorAll("button").forEach(b => b.onclick = () => { filtreActif = b.dataset.g; rendreFiltres(); rendreCatalogue(); });
+}
+
+function etiquettePrix(p){
+  const k = prixDispo(p);
+  if(!k.length) return "Bientôt disponible";
+  const m = Math.min(...k.map(x => Number(p.prix[x])));
+  return (k.length > 1 ? "Dès " : "") + prixUSD(m);
+}
+
+function rendreCatalogue(){
+  const liste = PRODS.filter(p => filtreActif === "Tous" || p.genre === filtreActif);
+  if(!liste.length){ $("#grille").innerHTML = `<p class="vide">Aucune prod pour le moment.</p>`; return; }
+  $("#grille").innerHTML = liste.map(p => `
+    <article class="carte">
+      <div class="pochette">${pochette(p)}
+        <button class="play" data-play="${esc(p.id)}" aria-label="Écouter l'extrait de ${esc(p.titre)}">${ICONE_PLAY}</button>
+      </div>
+      <div class="corps">
+        <h3>${esc(p.titre)}</h3>
+        <p class="meta">${esc(p.genre)}, ${esc(p.bpm)} BPM, ${esc(p.tonalite)}</p>
+        <div class="barre"><i data-barre="${esc(p.id)}"></i></div>
+        <div class="bas">
+          <span class="prix">${etiquettePrix(p)}</span>
+          <button class="btn petit" data-fiche="${esc(p.id)}">Voir la fiche</button>
+        </div>
+      </div>
+    </article>`).join("");
+  document.querySelectorAll("[data-play]").forEach(b => b.onclick = () => lecteur.basculer(b.dataset.play));
+  document.querySelectorAll("[data-fiche]").forEach(b => b.onclick = () => ouvrirFiche(b.dataset.fiche));
+  lecteur.majBoutons();
+}
+
+let ficheId = null;
+function ouvrirFiche(id){
+  const p = prod(id); if(!p) return; ficheId = id;
+  $("#fichePochette").innerHTML = pochette(p);
+  $("#ficheTitre").textContent = p.titre;
+  $("#ficheDesc").textContent = p.description || "";
+  $("#ficheSpecs").innerHTML = `
+    <div class="spec">BPM<b>${esc(p.bpm)}</b></div>
+    <div class="spec">Tonalité<b>${esc(p.tonalite)}</b></div>
+    <div class="spec">Style<b>${esc(p.genre)}</b></div>`;
+  const dispo = prixDispo(p);
+  const dejaPanier = panier.find(l => l.id === id);
+  const choix = dejaPanier && dispo.includes(dejaPanier.fmt) ? dejaPanier.fmt : dispo[0];
+  const noms = { mp3:["MP3","Fichier audio haute qualité"], wav:["WAV","Qualité studio non compressée"] };
+  $("#formats").innerHTML = `<legend>Choisis ton format</legend>` + (dispo.length ? dispo.map(k => `
+    <label class="format"><span><b>${noms[k][0]}</b> <small>${noms[k][1]}</small></span>
+      <span class="prix">${prixUSD(p.prix[k])} <input type="radio" name="fmt" value="${k}" ${k===choix?"checked":""}></span></label>`).join("")
+    : `<p class="meta">Prochainement disponible à l'achat.</p>`);
+  const e = $("#ficheEcoute"); e.dataset.id = id;
+  e.onclick = () => lecteur.basculer(id);
+  $("#ficheBarre").dataset.barre = id;
+  $("#ajouter").disabled = !dispo.length;
+  $("#ajouter").textContent = dejaPanier ? "Mettre à jour le panier" : "Ajouter au panier";
+  lecteur.majBoutons();
+  $("#fiche").showModal();
+}
+$("#fermerFiche").onclick = () => $("#fiche").close();
+$("#fiche").addEventListener("click", e => { if(e.target === $("#fiche")) $("#fiche").close(); });
+$("#ajouter").onclick = () => {
+  const sel = document.querySelector('input[name="fmt"]:checked'); if(!sel) return;
+  const i = panier.findIndex(l => l.id === ficheId);
+  if(i >= 0) panier[i].fmt = sel.value; else panier.push({ id:ficheId, fmt:sel.value });
+  sauverPanier(); rendrePanier();
+  $("#fiche").close(); ouvrirPanier();
+};
+
+let panier = store.get("panier", []).filter(l => prod(l.id) && Number(prod(l.id).prix?.[l.fmt]) > 0);
+function sauverPanier(){ store.set("panier", panier); }
+const totalPanier = () => panier.reduce((s,l) => s + Number(prod(l.id).prix[l.fmt]), 0);
+
+function rendrePanier(){
+  panier = panier.filter(l => prod(l.id) && Number(prod(l.id).prix?.[l.fmt]) > 0);
+  $("#nbPanier").textContent = panier.length;
+  $("#lignes").innerHTML = panier.length ? panier.map(l => {
+    const p = prod(l.id);
+    return `<div class="ligne">
+      <div class="pochette">${pochette(p)}</div>
+      <div><b>${esc(p.titre)}</b><br><small>${l.fmt.toUpperCase()}, ${prixUSD(p.prix[l.fmt])}</small></div>
+      <button class="retirer" data-retirer="${esc(l.id)}">Retirer</button></div>`;
+  }).join("") : `<p class="vide">Ton panier est vide.</p>`;
+  document.querySelectorAll("[data-retirer]").forEach(b => b.onclick = () => {
+    panier = panier.filter(l => l.id !== b.dataset.retirer); sauverPanier(); rendrePanier();
+  });
+  $("#total").textContent = prixUSD(totalPanier());
+  $("#payer").disabled = !panier.length;
+}
+
+function ouvrirPanier(){ $("#panier").classList.add("ouvert"); $("#voile").classList.add("ouvert"); $("#panier").setAttribute("aria-hidden","false"); }
+function fermerPanier(){ $("#panier").classList.remove("ouvert"); $("#voile").classList.remove("ouvert"); $("#panier").setAttribute("aria-hidden","true"); }
+$("#btnPanier").onclick = ouvrirPanier;
+$("#fermerPanier").onclick = fermerPanier;
+$("#voile").onclick = fermerPanier;
+document.addEventListener("keydown", e => { if(e.key === "Escape") fermerPanier(); });
+
+function msg(texte, type){ const m = $("#msgPaiement"); m.textContent = texte; m.className = "msg " + (type||""); }
+
+$("#payer").onclick = async () => {
+  const email = $("#email").value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)){ msg("Entre un email valide.", "err"); $("#email").focus(); return; }
+  const reference = "cmd_" + Date.now();
+  const commande = { reference, email, montant:totalPanier(), lignes:panier.slice() };
+  store.set("commandeEnAttente", commande);
+  $("#payer").disabled = true; msg("Connexion au paiement…");
+
+  if(!CONFIG.notchPublicKey){
+    setTimeout(() => { confirmerCommande(commande); msg("Mode démo : paiement simulé.", "ok"); }, 900);
+    return;
+  }
+  try{
+    const r = await fetch("https://api.notchpay.co/payments", {
+      method:"POST",
+      headers:{ "Authorization": CONFIG.notchPublicKey, "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify({
+        email, currency: CONFIG.devise, amount: commande.montant, reference,
+        description: "Beat purchase at " + CONFIG.nomBoutique,
+        callback: CONFIG.urlRetour
+      })
+    });
+    const data = await r.json();
+    if(!r.ok || !data.authorization_url) throw new Error(data.message || "Erreur d'initialisation");
+    location.href = data.authorization_url;
+  }catch(err){
+    msg("Échec du paiement : " + err.message, "err");
+    $("#payer").disabled = false;
+  }
+};
+
+async function verifierRetour(){
+  const q = new URLSearchParams(location.search);
+  const ref = q.get("reference") || q.get("trxref") || q.get("notchpay_trxref");
+  if(!ref) return;
+  const commande = store.get("commandeEnAttente", null);
+  history.replaceState({}, "", location.pathname);
+  if(!commande) return;
+  try{
+    const r = await fetch("https://api.notchpay.co/payments/" + encodeURIComponent(ref), {
+      headers:{ "Authorization": CONFIG.notchPublicKey, "Accept":"application/json" }
+    });
+    const data = await r.json();
+    const statut = data?.transaction?.status || data?.status;
+    if(statut === "complete") confirmerCommande(commande);
+    else afficherBanniere("Paiement non confirmé (" + (statut || "inconnu") + ").", true);
+  }catch(e){
+    afficherBanniere("Impossible de vérifier le paiement.", true);
+  }
+}
+
+function confirmerCommande(commande){
+  const achats = store.get("achats", []);
+  achats.unshift({ reference:commande.reference, date:new Date().toISOString(), lignes:commande.lignes });
+  store.set("achats", achats);
+  store.del("commandeEnAttente");
+  panier = []; sauverPanier(); rendrePanier();
+  fermerPanier(); $("#payer").disabled = false; msg("");
+  rendreAchats();
+  afficherBanniere("Paiement confirmé ! Tes liens de téléchargement sont prêts.");
+  $("#achats").scrollIntoView({ behavior:"smooth" });
+  const l = commande.lignes[0];
+  const p = l && prod(l.id);
+  if(p && p.fichiers?.[l.fmt]) telecharger(p.fichiers[l.fmt]);
+}
+function telecharger(url){
+  const a = document.createElement("a");
+  a.href = url; a.download = ""; document.body.appendChild(a); a.click(); a.remove();
+}
+function afficherBanniere(texte, erreur){
+  const b = document.createElement("div");
+  b.className = "banniere" + (erreur ? " err" : ""); b.textContent = texte; b.setAttribute("role","status");
+  const cible = $("#achats").hidden ? $("#catalogue") : $("#achats");
+  cible.parentNode.insertBefore(b, cible);
+  setTimeout(() => b.remove(), 9000);
+}
+function rendreAchats(){
+  const achats = store.get("achats", []);
+  $("#achats").hidden = !achats.length;
+  $("#btnAchats").hidden = !achats.length;
+  $("#listeAchats").innerHTML = achats.map(a => a.lignes.map(l => {
+    const p = prod(l.id); if(!p) return "";
+    const url = p.fichiers?.[l.fmt];
+    return `<div class="achat"><div><b>${esc(p.titre)}</b><br><span class="meta">${l.fmt.toUpperCase()} • Réf: ${esc(a.reference)}</span></div>
+      <div class="liens">${url ? `<a class="btn petit" href="${esc(url)}" download>Télécharger le ${l.fmt.toUpperCase()}</a>` : `<span class="meta">Fichier en cours de mise en ligne</span>`}</div></div>`;
+  }).join("")).join("");
+}
+$("#btnAchats").onclick = () => $("#achats").scrollIntoView({ behavior:"smooth" });
+
+let editId = null, imageTemp = "";
+
+function toutRafraichir(){ rendreFiltres(); rendreCatalogue(); rendrePanier(); rendreAchats(); }
+function sauverBrouillon(){ store.set("brouillonCatalogue", PRODS); toutRafraichir(); }
+const modifie = () => JSON.stringify(PRODS) !== JSON.stringify(PUBLIE);
+
+function ouvrirAdmin(){ editId = null; rendreAdmin(); if(!$("#admin").open) $("#admin").showModal(); }
+$("#fermerAdmin").onclick = () => $("#admin").close();
+$("#admin").addEventListener("close", () => { if(location.hash === "#admin") history.replaceState(null, "", location.pathname + location.search); });
+
+function rendreAdmin(){
+  const corps = $("#adminCorps");
+  corps.innerHTML = `
+    <h2>Gestion des Prods</h2>
+    <p class="meta">Ajoute, modifie ou supprime tes prods. Télécharge ensuite le fichier mis à jour pour Netlify.</p>
+    <div class="adm-actions">
+      <button class="btn petit" id="admNouveau">Nouvelle prod</button>
+      <button class="btn petit sec" id="admPublier">Télécharger le fichier index.html</button>
+      ${modifie() ? `<button class="btn petit sec" id="admAnnuler">Annuler les modifications</button>` : ""}
+    </div>
+    ${modifie() ? `<p class="msg ok">Modifications non publiées enregistrées localement.</p>` : ""}
+    <div id="admListe">${PRODS.length ? PRODS.map(p => `
+      <div class="adm-prod">
+        <div class="pochette">${pochette(p)}</div>
+        <div><b>${esc(p.titre)}</b><br><span class="meta">${esc(p.genre)}, ${esc(p.bpm)} BPM, ${etiquettePrix(p)}</span></div>
+        <div class="btns"><button class="btn petit sec" data-edit="${esc(p.id)}">Modifier</button><button class="btn petit danger" data-suppr="${esc(p.id)}">Supprimer</button></div>
+      </div>`).join("") : `<p class="vide">Aucune prod.</p>`}</div>`;
+  $("#admNouveau").onclick = () => rendreFormulaire(null);
+  $("#admPublier").onclick = publier;
+  if($("#admAnnuler")) $("#admAnnuler").onclick = () => {
+    if(!confirm("Réinitialiser le catalogue ?")) return;
+    store.del("brouillonCatalogue"); PRODS = JSON.parse(JSON.stringify(PUBLIE)); toutRafraichir(); rendreAdmin();
+  };
+  corps.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => rendreFormulaire(b.dataset.edit));
+  corps.querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => {
+    const p = prod(b.dataset.suppr);
+    if(!confirm("Supprimer « " + p.titre + " » ?")) return;
+    PRODS = PRODS.filter(x => x.id !== p.id); sauverBrouillon(); rendreAdmin();
+  });
+}
+
+function rendreFormulaire(id){
+  editId = id;
+  const p = id ? prod(id) : { titre:"", genre:"", bpm:"", tonalite:"", description:"", prix:{mp3:"",wav:""}, preview:"", fichiers:{mp3:"",wav:""}, image:"" };
+  imageTemp = p.image || "";
+  const genres = [...new Set(PRODS.map(x => x.genre).filter(Boolean))];
+  $("#adminCorps").innerHTML = `
+    <h2>${id ? "Modifier la prod" : "Nouvelle prod"}</h2>
+    <form id="formProd" style="margin-top:16px">
+      <div class="grille-form">
+        <div class="champ large"><label for="f_titre">Titre</label><input id="f_titre" name="titre" required value="${esc(p.titre)}"></div>
+        <div class="champ"><label for="f_genre">Style</label><input id="f_genre" name="genre" list="listeGenres" placeholder="Trap, Drill..." value="${esc(p.genre)}"><datalist id="listeGenres">${genres.map(g => `<option value="${esc(g)}">`).join("")}</datalist></div>
+        <div class="champ"><label for="f_bpm">BPM</label><input id="f_bpm" name="bpm" type="number" min="40" max="260" value="${esc(p.bpm)}"></div>
+        <div class="champ"><label for="f_ton">Tonalité</label><input id="f_ton" name="tonalite" placeholder="F# mineur" value="${esc(p.tonalite)}"></div>
+        <div class="champ"><label for="f_pm">Prix MP3 ($)</label><input id="f_pm" name="pmp3" type="number" min="0" step="1" value="${esc(p.prix?.mp3 ?? "")}"></div>
+        <div class="champ"><label for="f_pw">Prix WAV ($)</label><input id="f_pw" name="pwav" type="number" min="0" step="1" value="${esc(p.prix?.wav ?? "")}"></div>
+        <div class="champ large"><label for="f_desc">Description</label><textarea id="f_desc" name="description">${esc(p.description)}</textarea></div>
+        <div class="champ large"><label for="f_img">Pochette</label><input id="f_img" type="file" accept="image/*">
+          <div class="apercu-pochette" id="apercu">${imageTemp ? `<img src="${imageTemp}" alt="Aperçu" style="width:100%">` : ""}</div>
+          <small>Image carrée recommandée.</small>
+          ${imageTemp ? `<button type="button" class="retirer" id="retirerImg">Retirer l'image</button>` : ""}</div>
+        <div class="champ large"><label for="f_prev">Extrait audio</label><input id="f_prev" name="preview" placeholder="extraits/demo.mp3" value="${esc(p.preview)}"><small>Vide = synthé démo intégré.</small></div>
+        <div class="champ"><label for="f_fm">Fichier MP3 vendu</label><input id="f_fm" name="fmp3" placeholder="fichiers/prod.mp3" value="${esc(p.fichiers?.mp3)}"></div>
+        <div class="champ"><label for="f_fw">Fichier WAV vendu</label><input id="f_fw" name="fwav" placeholder="fichiers/prod.wav" value="${esc(p.fichiers?.wav)}"></div>
+      </div>
+      <p class="msg err" id="admMsg" style="margin-top:10px"></p>
+      <div class="adm-actions"><button class="btn" type="submit">Enregistrer</button><button class="btn sec" type="button" id="admRetour">Annuler</button></div>
+    </form>`;
+  $("#admRetour").onclick = rendreAdmin;
+  $("#f_img").onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{ imageTemp = await lireImage(f); $("#apercu").innerHTML = `<img src="${imageTemp}" alt="Aperçu" style="width:100%">`; }
+    catch(err){ $("#admMsg").textContent = "Impossible de lire l'image."; }
+  };
+  if($("#retirerImg")) $("#retirerImg").onclick = () => { imageTemp = ""; $("#apercu").innerHTML = ""; $("#retirerImg").remove(); };
+  $("#formProd").onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const pm = Number(d.pmp3) || 0, pw = Number(d.pwav) || 0;
+    const ancien = editId ? prod(editId) : null;
+    const nouveau = {
+      id: ancien ? ancien.id : "p" + Date.now(),
+      titre: d.titre.trim(), genre: d.genre.trim(), bpm: Number(d.bpm) || 0, tonalite: d.tonalite.trim(),
+      teinte: ancien ? ancien.teinte : Math.floor(Math.random()*360),
+      description: d.description.trim(),
+      prix: { mp3: pm, wav: pw },
+      preview: d.preview.trim(),
+      fichiers: { mp3: d.fmp3.trim(), wav: d.fwav.trim() },
+      image: imageTemp
+    };
+    if(!nouveau.titre){ $("#admMsg").textContent = "Le titre est obligatoire."; return; }
+    if(ancien) PRODS = PRODS.map(x => x.id === ancien.id ? nouveau : x); else PRODS.unshift(nouveau);
+    sauverBrouillon(); rendreAdmin();
+  };
+}
+
+function lireImage(file){
+  return new Promise((ok, ko) => {
+    const fr = new FileReader();
+    fr.onerror = ko;
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = ko;
+      img.onload = () => {
+        const t = 700, c = document.createElement("canvas"); c.width = c.height = t;
+        const s = Math.min(img.width, img.height);
+        c.getContext("2d").drawImage(img, (img.width - s)/2, (img.height - s)/2, s, s, 0, 0, t, t);
+        ok(c.toDataURL("image/jpeg", .85));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+function publier(){
+  const OUV = '<scr' + 'ipt type="application/json" id="catalogue-data">';
+  const FERM = '</scr' + 'ipt>';
+  const a = SOURCE.indexOf(OUV);
+  const b = SOURCE.indexOf(FERM, a);
+  if(a < 0 || b < 0){ alert("Erreur lors de la génération."); return; }
+  const json = JSON.stringify(PRODS, null, 1).replace(/</g, "\u003c");
+  const html = SOURCE.slice(0, a + OUV.length) + "\n" + json + "\n" + SOURCE.slice(b);
+  const blob = new Blob([html], { type:"text/html" });
+  const lien = document.createElement("a");
+  lien.href = URL.createObjectURL(blob); lien.download = "index.html";
+  document.body.appendChild(lien); lien.click(); lien.remove();
+  setTimeout(() => URL.revokeObjectURL(lien.href), 2000);
+}
+
+window.addEventListener("hashchange", () => { if(location.hash === "#admin") ouvrirAdmin(); });
+
+$("#annee").textContent = new Date().getFullYear();
+toutRafraichir();
+verifierRetour();
+if(location.hash === "#admin") ouvrirAdmin();
+</script>
+</body>
+</html>
